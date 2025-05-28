@@ -1,0 +1,634 @@
+{% extends "base.html" %}
+
+{% block title %}Mật mã Caesar - An toàn thông tin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card fade-in">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-key me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <h2 class="mb-1">Mật mã Caesar</h2>
+                        <p class="mb-0" style="opacity: 0.9; font-size: 0.95rem;">
+                            Thuật toán mã hóa dịch chuyển ký tự cổ điển
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <!-- Algorithm Info -->
+                <div class="algorithm-info mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="info-card">
+                                <i class="fas fa-history text-primary mb-2"></i>
+                                <h6>Lịch sử</h6>
+                                <small class="text-muted">Được Julius Caesar sử dụng từ thế kỷ 1 TCN</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-card">
+                                <i class="fas fa-cogs text-success mb-2"></i>
+                                <h6>Phương pháp</h6>
+                                <small class="text-muted">Dịch chuyển mỗi ký tự theo một số vị trí cố định</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-card">
+                                <i class="fas fa-shield-alt text-warning mb-2"></i>
+                                <h6>Bảo mật</h6>
+                                <small class="text-muted">Mức độ thấp - chỉ 25 khả năng khóa</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('caesar') }}" class="needs-validation" novalidate>
+                    <!-- Text Input Section -->
+                    <div class="input-section mb-4">
+                        <label for="text" class="form-label">
+                            <i class="fas fa-edit me-2"></i>Văn bản cần xử lý
+                        </label>
+                        <div class="input-wrapper">
+                            <textarea 
+                                id="text" 
+                                name="text" 
+                                class="form-control" 
+                                rows="5" 
+                                placeholder="Nhập văn bản cần mã hóa hoặc giải mã..."
+                                required>{{ current_text or '' }}</textarea>
+                            <div class="input-info">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Hỗ trợ cả tiếng Việt và tiếng Anh
+                                </small>
+                                <small class="char-count text-muted">
+                                    <span id="charCount">0</span> ký tự
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Input Section -->
+                    <div class="input-section mb-4">
+                        <label for="key" class="form-label">
+                            <i class="fas fa-hashtag me-2"></i>Khóa dịch chuyển
+                        </label>
+                        <div class="key-input-wrapper">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-arrow-right"></i>
+                                </span>
+                                <input 
+                                    type="number" 
+                                    id="key" 
+                                    name="key" 
+                                    class="form-control" 
+                                    value="{{ key or '' }}" 
+                                    min="1" 
+                                    max="25"
+                                    placeholder="1-25"
+                                    required>
+                                <button type="button" class="btn btn-outline-secondary" id="randomKey">
+                                    <i class="fas fa-dice"></i>
+                                </button>
+                            </div>
+                            <div class="key-info mt-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    Số bước dịch chuyển trong bảng chữ cái (1-25)
+                                </small>
+                            </div>
+                            <!-- Key Visualization -->
+                            <div class="key-visualization mt-3" id="keyVisualization" style="display: none;">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="alphabet-demo">
+                                            <small class="text-muted d-block mb-1">Gốc:</small>
+                                            <div class="alphabet-strip" id="originalAlphabet">
+                                                ABCDEFGHIJKLMNOPQRSTUVWXYZ
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="alphabet-demo">
+                                            <small class="text-muted d-block mb-1">Sau dịch chuyển:</small>
+                                            <div class="alphabet-strip shifted" id="shiftedAlphabet">
+                                                ABCDEFGHIJKLMNOPQRSTUVWXYZ
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-section">
+                        <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+                            <button type="submit" name="action" value="encrypt" class="btn btn-primary btn-lg">
+                                <i class="fas fa-lock me-2"></i>
+                                <span class="btn-text">Mã hóa</span>
+                                <div class="btn-shine"></div>
+                            </button>
+                            <button type="submit" name="action" value="decrypt" class="btn btn-warning btn-lg">
+                                <i class="fas fa-unlock me-2"></i>
+                                <span class="btn-text">Giải mã</span>
+                                <div class="btn-shine"></div>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-lg" id="clearForm">
+                                <i class="fas fa-eraser me-2"></i>
+                                Xóa
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Result Section -->
+        {% if result is defined %}
+        <div class="card mt-4 result-card fade-in">
+            <div class="card-header bg-success text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <h4 class="mb-0">Kết quả</h4>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-light" id="copyResult">
+                        <i class="fas fa-copy me-1"></i>Sao chép
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="result-content">
+                    <div class="result-text" id="resultText">{{ result }}</div>
+                    <div class="result-stats mt-3">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <i class="fas fa-font text-primary me-2"></i>
+                                    <span class="stat-value">{{ result|length }}</span>
+                                    <span class="stat-label">ký tự</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <i class="fas fa-space-shuttle text-success me-2"></i>
+                                    <span class="stat-value">{{ result.split()|length }}</span>
+                                    <span class="stat-label">từ</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <i class="fas fa-key text-warning me-2"></i>
+                                    <span class="stat-value">{{ key or 0 }}</span>
+                                    <span class="stat-label">khóa</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Quick Examples -->
+        <div class="card mt-4 examples-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Ví dụ nhanh
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="example-item" data-text="HELLO WORLD" data-key="3">
+                            <div class="example-header">
+                                <strong>Ví dụ 1:</strong> Mã hóa cơ bản
+                            </div>
+                            <div class="example-content">
+                                <div class="text-muted small mb-1">Văn bản: HELLO WORLD</div>
+                                <div class="text-muted small mb-1">Khóa: 3</div>
+                                <div class="text-primary small">Kết quả: KHOOR ZRUOG</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="example-item" data-text="CRYPTOGRAPHY" data-key="13">
+                            <div class="example-header">
+                                <strong>Ví dụ 2:</strong> ROT13
+                            </div>
+                            <div class="example-content">
+                                <div class="text-muted small mb-1">Văn bản: CRYPTOGRAPHY</div>
+                                <div class="text-muted small mb-1">Khóa: 13</div>
+                                <div class="text-primary small">Kết quả: PELCGBTENCUL</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Additional styles for Caesar page */
+.algorithm-info {
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.info-card {
+    text-align: center;
+    padding: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.info-card i {
+    font-size: 1.5rem;
+}
+
+.input-section {
+    position: relative;
+}
+
+.input-wrapper, .key-input-wrapper {
+    position: relative;
+}
+
+.input-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.char-count {
+    font-weight: 500;
+}
+
+.key-visualization {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    border: 1px solid #f59e0b;
+}
+
+.alphabet-demo {
+    background: white;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+}
+
+.alphabet-strip {
+    font-family: Monaco, 'Courier New', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--text-primary);
+    background: #f8fafc;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--border-color);
+}
+
+.alphabet-strip.shifted {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.action-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    min-width: 140px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn:hover .btn-shine {
+    left: 100%;
+}
+
+.result-card {
+    animation: slideInUp 0.5s ease-out;
+}
+
+.result-content {
+    position: relative;
+}
+
+.result-text {
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border: 2px solid #0ea5e9;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    font-family: Monaco, 'Courier New', monospace;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    word-break: break-all;
+    min-height: 4rem;
+    position: relative;
+}
+
+.result-text::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    border-radius: 2px 0 0 2px;
+}
+
+.result-stats {
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.5rem;
+}
+
+.stat-value {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.examples-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.9));
+}
+
+.example-item {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.example-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.example-header {
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .algorithm-info {
+        padding: 1rem;
+    }
+    
+    .info-card {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .key-visualization {
+        padding: 0.75rem;
+    }
+    
+    .alphabet-strip {
+        font-size: 0.65rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .btn-lg {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        min-width: 120px;
+    }
+    
+    .result-text {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .stat-item {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const textArea = document.getElementById('text');
+    const keyInput = document.getElementById('key');
+    const charCount = document.getElementById('charCount');
+    const keyVisualization = document.getElementById('keyVisualization');
+    const originalAlphabet = document.getElementById('originalAlphabet');
+    const shiftedAlphabet = document.getElementById('shiftedAlphabet');
+    const randomKeyBtn = document.getElementById('randomKey');
+    const clearFormBtn = document.getElementById('clearForm');
+    const copyResultBtn = document.getElementById('copyResult');
+    const exampleItems = document.querySelectorAll('.example-item');
+
+    // Character counter
+    function updateCharCount() {
+        const count = textArea.value.length;
+        charCount.textContent = count;
+        charCount.style.color = count > 1000 ? 'var(--danger-color)' : 'var(--text-secondary)';
+    }
+
+    textArea.addEventListener('input', updateCharCount);
+    updateCharCount();
+
+    // Key visualization
+    function updateKeyVisualization() {
+        const key = parseInt(keyInput.value) || 0;
+        if (key > 0 && key <= 25) {
+            keyVisualization.style.display = 'block';
+            
+            // Generate shifted alphabet
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let shifted = '';
+            
+            for (let i = 0; i < alphabet.length; i++) {
+                const shiftedIndex = (i + key) % 26;
+                shifted += alphabet[shiftedIndex];
+            }
+            
+            shiftedAlphabet.textContent = shifted;
+            
+            // Animate the shift
+            shiftedAlphabet.style.animation = 'none';
+            setTimeout(() => {
+                shiftedAlphabet.style.animation = 'slideInRight 0.5s ease-out';
+            }, 10);
+        } else {
+            keyVisualization.style.display = 'none';
+        }
+    }
+
+    keyInput.addEventListener('input', updateKeyVisualization);
+    updateKeyVisualization();
+
+    // Random key generator
+    randomKeyBtn.addEventListener('click', function() {
+        const randomKey = Math.floor(Math.random() * 25) + 1;
+        keyInput.value = randomKey;
+        updateKeyVisualization();
+        
+        // Add visual feedback
+        this.style.transform = 'rotate(360deg)';
+        setTimeout(() => {
+            this.style.transform = 'rotate(0deg)';
+        }, 300);
+    });
+
+    // Clear form
+    clearFormBtn.addEventListener('click', function() {
+        textArea.value = '';
+        keyInput.value = '';
+        updateCharCount();
+        updateKeyVisualization();
+        
+        // Add visual feedback
+        textArea.style.backgroundColor = '#fffbeb';
+        setTimeout(() => {
+            textArea.style.backgroundColor = '';
+        }, 300);
+    });
+
+    // Copy result
+    if (copyResultBtn) {
+        copyResultBtn.addEventListener('click', function() {
+            const resultText = document.getElementById('resultText').textContent;
+            navigator.clipboard.writeText(resultText).then(() => {
+                // Visual feedback
+                this.innerHTML = '<i class="fas fa-check me-1"></i>Đã sao chép!';
+                this.classList.remove('btn-outline-light');
+                this.classList.add('btn-light');
+                
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-copy me-1"></i>Sao chép';
+                    this.classList.remove('btn-light');
+                    this.classList.add('btn-outline-light');
+                }, 2000);
+            });
+        });
+    }
+
+    // Example items
+    exampleItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const text = this.dataset.text;
+            const key = this.dataset.key;
+            
+            textArea.value = text;
+            keyInput.value = key;
+            updateCharCount();
+            updateKeyVisualization();
+            
+            // Smooth scroll to form
+            textArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Highlight the textarea
+            textArea.style.borderColor = 'var(--primary-color)';
+            setTimeout(() => {
+                textArea.style.borderColor = '';
+            }, 2000);
+        });
+    });
+
+    // Form validation
+    const form = document.querySelector('.needs-validation');
+    form.addEventListener('submit', function(e) {
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+
+    // Auto-resize textarea
+    function autoResizeTextarea() {
+        textArea.style.height = 'auto';
+        textArea.style.height = textArea.scrollHeight + 'px';
+    }
+
+    textArea.addEventListener('input', autoResizeTextarea);
+    autoResizeTextarea();
+});
+
+// Add custom CSS animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

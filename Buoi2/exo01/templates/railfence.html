@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Mật mã Rail Fence{% endblock %}
+
+{% block content %}
+<div class="card"> {# Add a card to wrap the main content #}
+    <div class="card-header">
+        <h2 class="mb-0">Mật mã Rail Fence</h2> {# mb-0 to remove bottom margin of h2 #}
+    </div>
+    <div class="card-body"> {# Add card-body for inner card content #}
+        <form method="POST" action="{{ url_for('railfence') }}">
+            <div class="mb-3"> {# mb-3 adds bottom margin #}
+                <label for="text" class="form-label">Văn bản:</label> {# form-label for the label #}
+                <textarea id="text" name="text" rows="4" class="form-control" placeholder="Nhập văn bản cần mã hóa/giải mã" required>{{ current_text or '' }}</textarea> {# form-control for textarea #}
+            </div>
+            <div class="mb-3">
+                <label for="key" class="form-label">Khóa (số hàng - rails):</label>
+                <input type="number" id="key" name="key" class="form-control" placeholder="Nhập số hàng (ví dụ: 3)" value="{{ key or '' }}" required min="2"> {# form-control for input #}
+                <div class="form-text">Khóa phải là một số nguyên lớn hơn hoặc bằng 2.</div> {# Hint for the user #}
+            </div>
+            <div class="d-grid gap-2 d-md-block"> {# d-grid and gap-2 for buttons, d-md-block for horizontal display on larger screens #}
+                <button type="submit" name="action" value="encrypt" class="btn btn-primary">Mã hóa</button>
+                <button type="submit" name="action" value="decrypt" class="btn btn-warning">Giải mã</button> {# Using btn-warning for decrypt #}
+            </div>
+        </form>
+
+        {% if result is defined %}
+        <div class="result mt-4"> {# mt-4 adds top margin #}
+            <h3>Kết quả:</h3>
+            <p>{{ result }}</p>
+        </div>
+        {% endif %}
+    </div> {# End card-body #}
+</div> {# End card #}
+{% endblock %}

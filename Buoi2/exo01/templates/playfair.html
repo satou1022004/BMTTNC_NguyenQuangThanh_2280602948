@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Mật mã Playfair{% endblock %}
+
+{% block content %}
+<div class="card"> {# Thêm card để bao bọc nội dung chính #}
+    <div class="card-header">
+        <h2 class="mb-0">Mật mã Playfair</h2> {# mb-0 loại bỏ margin dưới của h2 #}
+    </div>
+    <div class="card-body"> {# Thêm card-body cho nội dung bên trong card #}
+        <form method="POST" action="{{ url_for('playfair') }}">
+            <div class="mb-3"> {# mb-3 thêm margin bottom #}
+                <label for="text" class="form-label">Văn bản:</label> {# form-label cho label #}
+                <textarea id="text" name="text" rows="4" class="form-control" placeholder="Nhập văn bản cần mã hóa/giải mã" required>{{ current_text or '' }}</textarea> {# form-control cho textarea #}
+                <div class="form-text">Lưu ý: Ký tự 'J' sẽ được thay thế bằng 'I' trong mật mã Playfair.</div> {# Gợi ý đặc trưng của Playfair #}
+            </div>
+            <div class="mb-3">
+                <label for="key" class="form-label">Khóa (chuỗi ký tự để tạo ma trận):</label>
+                <input type="text" id="key" name="key" class="form-control" placeholder="Nhập khóa (chỉ chữ cái, không lặp lại)" value="{{ key or '' }}" required pattern="[a-zA-Z]+"> {# form-control cho input #}
+                <div class="form-text">Chỉ chấp nhận chữ cái (a-z, A-Z), không lặp lại ký tự trong khóa để có ma trận tốt nhất.</div>
+            </div>
+            <div class="d-grid gap-2 d-md-block"> {# d-grid và gap-2 cho nút, d-md-block để hiển thị theo hàng trên màn hình lớn #}
+                <button type="submit" name="action" value="encrypt" class="btn btn-primary">Mã hóa</button>
+                <button type="submit" name="action" value="decrypt" class="btn btn-warning">Giải mã</button> {# Sử dụng btn-warning cho giải mã #}
+            </div>
+        </form>
+
+        {% if result is defined %}
+        <div class="result mt-4"> {# mt-4 thêm margin top #}
+            <h3>Kết quả:</h3>
+            <p>{{ result }}</p>
+        </div>
+        {% endif %}
+    </div> {# Kết thúc card-body #}
+</div> {# Kết thúc card #}
+{% endblock %}
